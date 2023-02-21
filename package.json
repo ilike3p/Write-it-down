@@ -1,12 +1,14 @@
 {
-  "name": "note-taker",
+  "name": "note-taker-pro",
   "version": "1.0.0",
-  "description": "",
-  "main": "server.js",
+  "description": "Note taking app made with with express.js",
+  "main": "index.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "start": "node server.js"
+  }
   },
-  "author": "",
+  "author": "Tray Pearce",
   "license": "ISC",
   "dependencies": {
     "express": "^4.16.4"
