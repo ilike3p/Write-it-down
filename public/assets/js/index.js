@@ -1,126 +1,127 @@
-// Cache frequently used DOM elements
-const $noteTitle = $(".note-title");
-const $noteText = $(".note-textarea");
-const $saveNoteBtn = $(".save-note");
-const $newNoteBtn = $(".new-note");
-const $noteList = $(".list-container .list-group");
+// Cache selectors for faster access
+const noteTitle = document.querySelector(".note-title");
+const noteText = document.querySelector(".note-textarea");
+const saveNoteBtn = document.querySelector(".save-note");
+const newNoteBtn = document.querySelector(".new-note");
+const noteList = document.querySelector(".list-container .list-group");
 
-// activeNote is used to keep track of the note in the textarea
+// Keep track of the active note
 let activeNote = {};
 
-// Get all notes from the database
+// Function to get all notes from the database
 async function getNotes() {
-  try {
-    const response = await $.ajax({
-      url: "/api/notes",
-      method: "GET",
-    });
-    return response;
-  } catch (error) {
-    console.error(error);
-  }
+  const response = await fetch('/api/notes');
+  return await response.json();
 }
 
-// Save a note to the database
-async function saveNote() {
-  try {
-    const note = {
-      title: $noteTitle.val(),
-      text: $noteText.val(),
-    };
-    const response = await $.ajax({
-      url: "/api/notes",
-      method: "POST",
-      data: note,
-    });
-    return response;
-  } catch (error) {
-    console.error(error);
-  }
+// Function to save a note to the database
+async function saveNote(note) {
+  const response = await fetch('/api/notes', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(note),
+  });
+  return await response.json();
 }
 
-// Delete a note from the database
-async function deleteNote() {
-  try {
-    const id = $(this).parent(".list-group-item").data().id;
-    await $.ajax({
-      url: `api/notes/${id}`,
-      method: "DELETE",
-    });
-    if (activeNote.id === id) {
-      activeNote = {};
-    }
-    getAndRenderNotes();
-  } catch (error) {
-    console.error(error);
-  }
+// Function to delete a note from the database
+async function deleteNote(id) {
+  await fetch(`/api/notes/${id}`, { method: 'DELETE' });
 }
 
-// Display the active note or render empty inputs
+// Function to render the active note
 function renderActiveNote() {
-  $saveNoteBtn.hide();
+  saveNoteBtn.style.display = 'none';
 
   if (activeNote.id) {
-    $noteTitle.attr("readonly", true);
-    $noteText.attr("readonly", true);
-    $noteTitle.val(activeNote.title);
-    $noteText.val(activeNote.text);
+    noteTitle.readOnly = true;
+    noteText.readOnly = true;
+    noteTitle.value = activeNote.title;
+    noteText.value = activeNote.text;
   } else {
-    $noteTitle.attr("readonly", false);
-    $noteText.attr("readonly", false);
-    $noteTitle.val("");
-    $noteText.val("");
+    noteTitle.readOnly = false;
+    noteText.readOnly = false;
+    noteTitle.value = '';
+    noteText.value = '';
   }
 }
 
-// Update the view when a note is saved
-async function handleNoteSave() {
-  try {
-    const savedNote = await saveNote();
-    activeNote = savedNote;
+// Function to handle saving a note
+function handleNoteSave() {
+  const newNote = {
+    title: noteTitle.value,
+    text: noteText.value,
+  };
+
+  saveNote(newNote).then(() => {
     getAndRenderNotes();
     renderActiveNote();
-  } catch (error) {
-    console.error(error);
-  }
+  });
 }
 
-// Display a note when it is clicked
-function handleNoteView() {
-  activeNote = $(this).data();
+// Function to handle deleting a note
+function handleNoteDelete(event) {
+  event.stopPropagation();
+
+  const note = event.target.closest('.list-group-item').dataset;
+
+  if (activeNote.id === note.id) {
+    activeNote = {};
+  }
+
+  deleteNote(note.id).then(() => {
+    getAndRenderNotes();
+    renderActiveNote();
+  });
+}
+
+// Function to handle viewing a note
+function handleNoteView(event) {
+  activeNote = event.target.closest('.list-group-item').dataset;
   renderActiveNote();
 }
 
-// Allow the user to enter a new note
+// Function to handle creating a new note
 function handleNewNoteView() {
   activeNote = {};
   renderActiveNote();
 }
 
-// Show or hide the save button based on input values
+// Function to handle rendering the save button
 function handleRenderSaveBtn() {
-  if (!$noteTitle.val().trim() || !$noteText.val().trim()) {
-    $saveNoteBtn.hide();
-  } else {
-    $saveNoteBtn.show();
-  }
+  const isNoteEmpty = !noteTitle.value.trim() || !noteText.value.trim();
+  saveNoteBtn.style.display = isNoteEmpty ? 'none' : 'block';
 }
 
-// Render the list of note titles
+// Function to render the list of notes
 function renderNoteList(notes) {
-  $noteList.empty();
-  const noteListItems = notes.map((note) => {
-    const $li = $("<li>").addClass("list-group-item").data(note);
-    const $span = $("<span>").text(note.title);
-    const $delBtn = $("<i>")
-      .addClass("fas fa-trash-alt float-right text-danger delete-note");
-    $li.append($span, $delBtn);
-    return $li;
+  noteList.innerHTML = '';
+
+  const noteListItems = notes.map(note => {
+    const li = document.createElement('li');
+    li.className = 'list-group-item';
+    li.dataset.id = note.id;
+
+    const span = document.createElement('span');
+    span.textContent = note.title;
+
+    const delBtn = document.createElement('i');
+    delBtn.className = 'fas fa-trash-alt float-right text-danger delete-note';
+
+    li.append(span, delBtn);
+
+    return li;
   });
-  $noteList.append(noteListItems);
+
+  noteList.append(...noteListItems);
 }
 
-// Get and render the initial list of notes
+// Function to get and render the initial list of notes
 async function getAndRenderNotes() {
-  try {
-    const
+  const notes = await getNotes();
+  renderNoteList(notes);
+}
+
+// Add event listeners
+saveNoteBtn.addEventListener('click', handleNoteSave);
+noteList.addEventListener('click', handle
