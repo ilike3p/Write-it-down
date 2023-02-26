@@ -1,3 +1,4 @@
+// declared variables// 
 var $noteTitle = $(".note-title");
 var $noteText = $(".note-textarea");
 var $saveNoteBtn = $(".save-note");
@@ -142,6 +143,3 @@ $noteText.on("keyup", handleRenderSaveBtn);
 // Gets and renders the initial list of notes
 getAndRenderNotes();
 
-// Add event listeners
-saveNoteBtn.addEventListener('click', handleNoteSave);
-noteList.addEventListener('click', handle
