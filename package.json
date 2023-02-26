@@ -8,9 +8,10 @@
     "start": "node server.js"
   }
   },
-  "author": "Tray Pearce",
+  "author": "",
   "license": "ISC",
   "dependencies": {
     "express": "^4.16.4"
   }
-}
+},
+
